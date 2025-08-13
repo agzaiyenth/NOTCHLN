@@ -308,7 +308,7 @@ export default function BookingPage({ params }: { params: { id: string } }) {
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total Fee</span>
-                    <span className="text-govdocs-blue">PKR 2,500</span>
+                    <span className="text-govdocs-blue">Lkr 2,500</span>
                   </div>
                 </div>
 
