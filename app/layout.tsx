@@ -13,7 +13,6 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "GovDocs - Your AI Document Assistant",
   description: "Request, track, and verify your government documents effortlessly with AI guidance",
-  generator: "v0.app",
 }
 
 export default function RootLayout({
