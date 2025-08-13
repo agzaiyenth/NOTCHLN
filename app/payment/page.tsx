@@ -45,7 +45,7 @@ export default function PaymentPage() {
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Amount Paid</span>
-                  <span className="font-semibold">PKR 2,500</span>
+                  <span className="font-semibold">Lkr 2,500</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Service</span>
@@ -205,7 +205,7 @@ export default function PaymentPage() {
                       Processing Payment...
                     </>
                   ) : (
-                    `Pay PKR 2,500`
+                    `Pay Lkr 2,500`
                   )}
                 </Button>
               </CardContent>
@@ -230,16 +230,16 @@ export default function PaymentPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Processing Fee</span>
-                    <span>PKR 2,000</span>
+                    <span>Lkr 2,000</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service Charges</span>
-                    <span>PKR 500</span>
+                    <span>Lkr 500</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total Amount</span>
-                    <span className="text-govdocs-blue">PKR 2,500</span>
+                    <span className="text-govdocs-blue">Lkr 2,500</span>
                   </div>
                 </div>
 
