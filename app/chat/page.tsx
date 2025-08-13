@@ -56,7 +56,7 @@ export default function ChatPage() {
   }
 
   const simulateAIResponse = async (userMessage: string) => {
-    console.log("Sending message:", userMessage) // Added debugging
+    console.log("Sending message:", userMessage) 
     setIsTyping(true)
 
     try {
@@ -76,7 +76,7 @@ export default function ChatPage() {
       }
 
       const data = await response.json()
-      console.log("Received response:", data) // Added debugging
+      console.log("Received response:", data)
       setIsTyping(false)
 
       addMessage(data.message, "ai", {
@@ -86,7 +86,7 @@ export default function ChatPage() {
         showPayment: data.showPayment || false,
       })
     } catch (error) {
-      console.error("Chat API Error:", error) // Added better error logging
+      console.error("Chat API Error:", error) 
       setIsTyping(false)
       addMessage(
         "I'm having trouble processing your request right now. Please try again or contact our support team.",
@@ -100,7 +100,7 @@ export default function ChatPage() {
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
-      console.log("Sending message via input:", inputValue) // Added debugging
+      console.log("Sending message via input:", inputValue) 
       addMessage(inputValue, "user")
       simulateAIResponse(inputValue)
       setInputValue("")
@@ -108,7 +108,7 @@ export default function ChatPage() {
   }
 
   const handleQuickReply = (reply: string) => {
-    console.log("Quick reply clicked:", reply) // Added debugging
+    console.log("Quick reply clicked:", reply) 
     addMessage(reply, "user")
     simulateAIResponse(reply)
   }
@@ -121,7 +121,7 @@ export default function ChatPage() {
   }
 
   const handleUploadComplete = () => {
-    console.log("Upload completed") // Added debugging
+    console.log("Upload completed") 
     handleQuickReply("Documents uploaded successfully")
   }
 
@@ -171,7 +171,7 @@ export default function ChatPage() {
                         className="text-xs bg-transparent border-gray-300 hover:bg-gray-50 cursor-pointer"
                         onClick={(e) => {
                           e.preventDefault()
-                          console.log("Button clicked:", reply) // Added debugging
+                          console.log("Button clicked:", reply)
                           handleQuickReply(reply)
                         }}
                         type="button"

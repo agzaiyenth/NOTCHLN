@@ -96,7 +96,6 @@ export default function DocumentUploadPage() {
 
       setUploadedFiles((prev) => [...prev, newFile])
 
-      // Simulate upload progress
       const interval = setInterval(() => {
         setUploadedFiles((prev) =>
           prev.map((f) => {
@@ -104,15 +103,13 @@ export default function DocumentUploadPage() {
               const newProgress = Math.min(f.progress + Math.random() * 30, 100)
               if (newProgress >= 100) {
                 clearInterval(interval)
-                // Simulate processing and verification
                 setTimeout(() => {
                   setUploadedFiles((prev) =>
                     prev.map((file) => (file.id === newFile.id ? { ...file, status: "processing" } : file)),
                   )
 
-                  // Simulate verification result
                   setTimeout(() => {
-                    const isVerified = Math.random() > 0.2 // 80% success rate
+                    const isVerified = Math.random() > 0.2 
                     setUploadedFiles((prev) =>
                       prev.map((file) =>
                         file.id === newFile.id
