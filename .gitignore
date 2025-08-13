@@ -17,6 +17,8 @@ yarn-error.log*
 .env
 .env.*.local
 
+.next/
+
 # Optional editor directories
 .idea/
 .vscode/
