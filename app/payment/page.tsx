@@ -112,7 +112,7 @@ export default function PaymentPage() {
                       <Smartphone className="w-5 h-5 text-gray-600" />
                       <Label htmlFor="mobile" className="flex-1 cursor-pointer">
                         <div className="font-medium">Mobile Payment</div>
-                        <div className="text-sm text-gray-500">JazzCash, Easypaisa, UBL Omni</div>
+                        <div className="text-sm text-gray-500">EzCash, Solo Pay, Koko Payment</div>
                       </Label>
                     </div>
 
