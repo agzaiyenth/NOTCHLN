@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+
+# Yarn integrity file
+.yarn-integrity
+
+# Yarn cache directory
+.yarn/cache/
+
+# Logs
+logs
+*.log
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment variables
+.env
+.env.*.local
+
+# Optional editor directories
+.idea/
+.vscode/
+
+# MacOS system files
+.DS_Store
