@@ -1,10 +1,71 @@
+'use client'
+
 import { FileText, Users, Shield, ArrowRight, CheckCircle, Star, MessageSquare, Clock, Zap } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { db } from "@/lib/firebase"
+import { doc, getDoc } from "firebase/firestore"
 
 export default function Page() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [firstName, setFirstName] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken")
+    let logoutTimer: NodeJS.Timeout
+
+    const resetTimer = () => {
+      if (logoutTimer) clearTimeout(logoutTimer)
+      logoutTimer = setTimeout(() => {
+        localStorage.removeItem("authToken")
+        setIsLoggedIn(false)
+        alert("You have been logged out due to inactivity.")
+      }, 30 * 60 * 1000) // 30 minutes
+    }
+
+    if (authToken) {
+      const { token, expiresAt } = JSON.parse(authToken)
+      if (new Date().getTime() < expiresAt) {
+        setIsLoggedIn(true)
+        // Fetch the user's first name from Firestore
+        const fetchUserData = async () => {
+          try {
+            const userDoc = await getDoc(doc(db, "users", token))
+            if (userDoc.exists()) {
+              setFirstName(userDoc.data().firstName)
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error)
+          }
+        }
+        fetchUserData()
+
+        // Set up activity listeners
+        window.addEventListener("mousemove", resetTimer)
+        window.addEventListener("keypress", resetTimer)
+        resetTimer()
+      } else {
+        localStorage.removeItem("authToken")
+      }
+    }
+
+    setIsLoading(false)
+
+    return () => {
+      if (logoutTimer) clearTimeout(logoutTimer)
+      window.removeEventListener("mousemove", resetTimer)
+      window.removeEventListener("keypress", resetTimer)
+    }
+  }, [])
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Navigation */}
@@ -27,17 +88,54 @@ export default function Page() {
               <a href="#how-it-works" className="text-gray-600 hover:text-govdocs-blue transition-colors">
                 How It Works
               </a>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button size="sm" className="bg-govdocs-blue hover:bg-blue-700" asChild>
-                <Link href="/signup">Get Started</Link>
-              </Button>
+              {isLoggedIn ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-900 text-bold">Hey, {firstName}! 👋</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-gray-600 hover:text-blue-700"
+                    onClick={() => {
+                      localStorage.removeItem("authToken")
+                      setIsLoggedIn(false)
+                      setFirstName("")
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button size="sm" className="bg-govdocs-blue hover:bg-blue-700" asChild>
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </>
+              )}
             </div>
             <div className="md:hidden">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">Sign In</Link>
-              </Button>
+              {isLoggedIn ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-600">Hey, {firstName}!</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      localStorage.removeItem("authToken")
+                      setIsLoggedIn(false)
+                      setFirstName("")
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -393,7 +491,7 @@ export default function Page() {
               assistant.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-govdocs-blue hover:bg-gray-100 text-lg px-8" asChild>
+              <Button size="lg" className="bg-white text-govdocs-blue hover:bg-gray-100 text-lg px-8">
                 <Link href="/signup">
                   Get Started Free
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -403,7 +501,6 @@ export default function Page() {
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-govdocs-blue text-lg px-8 bg-transparent"
-                asChild
               >
                 <Link href="/chat">Try AI Assistant</Link>
               </Button>

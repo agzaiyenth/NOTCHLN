@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from "react"
+import { registerUser } from "@/lib/authServices"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,8 +9,72 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function SignupPage() {
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  })
+
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }))
+  }
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAgreeToTerms(e.target.checked)
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError("")
+
+    if (!agreeToTerms) {
+      setError("Please agree to the terms and conditions first.")
+      return
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.")
+      return
+    }
+
+    setLoading(true)
+    try {
+      await registerUser(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName,
+        formData.phone
+      )
+      alert("Account created successfully!")
+      router.push("/")
+    } catch (err: any) {
+      console.error(err)
+      if (err.message === "auth/email-already-in-use") {
+        setError("Email Already Exists. Try Again with a different email.")
+      } else {
+        setError("Failed to create account. Please try again.")
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -32,40 +100,82 @@ export default function SignupPage() {
             <CardDescription className="text-center">Create an account and start today</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="Harsha" className="h-11" />
+                  <Input
+                    id="firstName"
+                    placeholder="Harsha"
+                    className="h-11"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Kavinda" className="h-11" />
+                  <Input
+                    id="lastName"
+                    placeholder="Kavinda"
+                    className="h-11"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="kavinda135@gmail.com" className="h-11" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="kavinda135@gmail.com"
+                  className="h-11"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="(94) 75 445 5445" className="h-11" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="(94) 75 445 5445"
+                  className="h-11"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" className="h-11" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" placeholder="••••••••" className="h-11" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                />
               </div>
 
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+
               <div className="flex items-start space-x-2">
-                <Checkbox id="terms" className="mt-1" />
+                <Checkbox id="terms" className="mt-1" onCheckedChange={(checked) => setAgreeToTerms(!!checked)} />
                 <Label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed">
                   I agree to the{" "}
                   <Link href="/terms" className="text-govdocs-blue hover:text-blue-700">
@@ -78,7 +188,9 @@ export default function SignupPage() {
                 </Label>
               </div>
 
-              <Button className="w-full h-11 bg-govdocs-blue hover:bg-blue-700 text-base">Create Account</Button>
+              <Button type="submit" className="w-full h-11 bg-govdocs-blue hover:bg-blue-700 text-base" disabled={loading}>
+                {loading ? "Creating Account..." : "Create Account"}
+              </Button>
             </form>
 
             <div className="relative">
