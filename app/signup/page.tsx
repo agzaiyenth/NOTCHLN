@@ -42,6 +42,39 @@ export default function SignupPage() {
     e.preventDefault()
     setError("")
 
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
+      setError("All fields are required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setError("Password must include at least one uppercase letter.");
+      return;
+    }
+
+    if (!/[!@#$%^&*]/.test(formData.password)) {
+      setError("Password must include at least one special symbol.");
+      return;
+    }
+
+    const phoneRegex = /^0\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError("Enter a valid Sri Lankan phone number.");
+      return;
+    }
+      
+
     if (!agreeToTerms) {
       setError("Please agree to the terms and conditions first.")
       return

@@ -1,6 +1,14 @@
-import { auth, db } from "./firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { db } from "./firebase";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  updateProfile,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+
+const auth = getAuth();
 
 /**
  * Registers a new user using Firebase Authentication and saves user data in Firestore.
@@ -23,6 +31,11 @@ export async function registerUser(
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // Set displayName in Firebase Auth
+    await updateProfile(user, {
+      displayName: `${firstName} ${lastName}`,
+    });
+
     // Save user data in Firestore
     await setDoc(doc(db, "users", user.uid), {
       firstName,
@@ -33,13 +46,6 @@ export async function registerUser(
     });
 
     console.log("User registered and data saved successfully.");
-
-    // Generate and store authToken in localStorage
-    const tokenExpiration = new Date().getTime() + 30 * 60 * 1000; // 30 minutes from now
-    const authToken = { token: user.uid, expiresAt: tokenExpiration };
-    localStorage.setItem("authToken", JSON.stringify(authToken));
-
-    console.log("Auth token generated and stored:", authToken);
   } catch (error) {
     const firebaseError = error as any; // Cast error to any to access its properties
     console.error("Error registering user:", firebaseError);
@@ -49,3 +55,46 @@ export async function registerUser(
     throw firebaseError;
   }
 }
+
+/**
+ * Logs in a user using Firebase Authentication.
+ * @param {string} email - The user's email address.
+ * @param {string} password - The user's password.
+ * @returns {Promise<void>} - Resolves when the user is successfully logged in.
+ */
+export async function loginUser(email: string, password: string): Promise<void> {
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    console.log("User logged in successfully.");
+  } catch (error) {
+    const firebaseError = error as any; // Cast error to any to access its properties
+    console.error("Error logging in user:", firebaseError);
+    if (firebaseError.code === "auth/invalid-credential") {
+      throw new Error("auth/invalid-credential");
+    }
+    throw firebaseError;
+  }
+}
+
+export const monitorAuthState = (
+  onUserLoggedIn: (user: any) => void,
+  onUserLoggedOut: () => void
+) => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in
+      onUserLoggedIn(user);
+    } else {
+      // User is signed out
+      onUserLoggedOut();
+    }
+  });
+};
+
+export const getIdToken = async (): Promise<string> => {
+  const user = auth.currentUser;
+  if (user) {
+    return await user.getIdToken();
+  }
+  throw new Error("No user is currently signed in.");
+};

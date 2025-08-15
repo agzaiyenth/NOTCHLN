@@ -8,6 +8,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { db } from "@/lib/firebase"
 import { doc, getDoc } from "firebase/firestore"
+import { monitorAuthState, getIdToken } from "@/lib/authServices"
 
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -15,51 +16,32 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const authToken = localStorage.getItem("authToken")
-    let logoutTimer: NodeJS.Timeout
+    const handleUserLoggedIn = async (user: any) => {
+      setIsLoggedIn(true)
+      try {
+        const token = await getIdToken()
+        console.log("Token:", token) // Use this token for secure API requests
 
-    const resetTimer = () => {
-      if (logoutTimer) clearTimeout(logoutTimer)
-      logoutTimer = setTimeout(() => {
-        localStorage.removeItem("authToken")
-        setIsLoggedIn(false)
-        alert("You have been logged out due to inactivity.")
-      }, 30 * 60 * 1000) // 30 minutes
-    }
-
-    if (authToken) {
-      const { token, expiresAt } = JSON.parse(authToken)
-      if (new Date().getTime() < expiresAt) {
-        setIsLoggedIn(true)
-        // Fetch the user's first name from Firestore
-        const fetchUserData = async () => {
-          try {
-            const userDoc = await getDoc(doc(db, "users", token))
-            if (userDoc.exists()) {
-              setFirstName(userDoc.data().firstName)
-            }
-          } catch (error) {
-            console.error("Error fetching user data:", error)
-          }
+        // Fetch user data from Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid))
+        if (userDoc.exists()) {
+          setFirstName(userDoc.data().firstName || "User")
+        } else {
+          console.warn("User document does not exist in Firestore.")
         }
-        fetchUserData()
-
-        // Set up activity listeners
-        window.addEventListener("mousemove", resetTimer)
-        window.addEventListener("keypress", resetTimer)
-        resetTimer()
-      } else {
-        localStorage.removeItem("authToken")
+      } catch (error) {
+        console.error("Error fetching user data:", error)
       }
+      setIsLoading(false)
     }
 
-    setIsLoading(false)
-
-    return () => {
-      if (logoutTimer) clearTimeout(logoutTimer)
-      window.removeEventListener("mousemove", resetTimer)
-      window.removeEventListener("keypress", resetTimer)
+    const handleUserLoggedOut = () => {
+      setIsLoggedIn(false)
+      setFirstName("")
+      setIsLoading(false)
     }
+
+    monitorAuthState(handleUserLoggedIn, handleUserLoggedOut)
   }, [])
 
   if (isLoading) {
@@ -96,9 +78,7 @@ export default function Page() {
                     variant="outline"
                     className="text-gray-600 hover:text-blue-700"
                     onClick={() => {
-                      localStorage.removeItem("authToken")
                       setIsLoggedIn(false)
-                      setFirstName("")
                     }}
                   >
                     Sign Out
@@ -106,11 +86,11 @@ export default function Page() {
                 </div>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/login">Sign In</Link>
+                  <Button variant="outline" size="sm">
+                    <a href="/login">Sign In</a>
                   </Button>
-                  <Button size="sm" className="bg-govdocs-blue hover:bg-blue-700" asChild>
-                    <Link href="/signup">Get Started</Link>
+                  <Button size="sm" className="bg-govdocs-blue hover:bg-blue-700">
+                    <a href="/signup">Get Started</a>
                   </Button>
                 </>
               )}
@@ -123,9 +103,7 @@ export default function Page() {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      localStorage.removeItem("authToken")
                       setIsLoggedIn(false)
-                      setFirstName("")
                     }}
                   >
                     Sign Out

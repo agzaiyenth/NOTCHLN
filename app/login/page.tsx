@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from "react"
+import { loginUser } from "@/lib/authServices"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,8 +9,46 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      await loginUser(formData.email, formData.password)
+      alert("Login successful!")
+      router.push("/")
+    } catch (err: any) {
+      console.error(err)
+      if (err.message === "auth/invalid-credential") {
+        setError("Check your credentials and try again.")
+      } else {
+        setError("Failed to log in. Please try again.")
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -32,15 +74,33 @@ export default function LoginPage() {
             <CardDescription className="text-center">Enter your email and password to log in</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="kavinda135@gmail.com" className="h-11" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="h-11"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" className="h-11" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="h-11"
+                />
               </div>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -54,7 +114,9 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              <Button className="w-full h-11 bg-govdocs-blue hover:bg-blue-700 text-base">Log In</Button>
+              <Button type="submit" className="w-full h-11 bg-govdocs-blue hover:bg-blue-700 text-base" disabled={loading}>
+                {loading ? "Logging in..." : "Log In"}
+              </Button>
             </form>
 
             <div className="relative">
