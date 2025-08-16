@@ -61,6 +61,9 @@ export default function Page() {
               <span className="text-xl font-bold text-gray-900">GovDocs</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
+              <a href="/dashboard" className="text-gray-600 hover:text-govdocs-blue transition-colors">
+                Dashboard
+              </a>
               <a href="#services" className="text-gray-600 hover:text-govdocs-blue transition-colors">
                 Services
               </a>
