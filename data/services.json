@@ -1,0 +1,54 @@
+[
+  {
+    "id": "nic",
+    "name": "NIC Replacement",
+    "description": "Apply for a new National Identity Card or replace an existing one",
+    "fee": 2500,
+    "processingTime": "3-5 working days",
+    "requirements": [
+      "Valid identification",
+      "Proof of address",
+      "Recent passport-size photographs",
+      "Previous NIC (if applicable)"
+    ]
+  },
+  {
+    "id": "passport",
+    "name": "Passport Application",
+    "description": "Apply for a new passport or renew an existing one",
+    "fee": 3500,
+    "processingTime": "5-7 working days",
+    "requirements": [
+      "Birth certificate",
+      "National ID card",
+      "Recent passport-size photographs",
+      "Previous passport (if renewal)"
+    ]
+  },
+  {
+    "id": "driving",
+    "name": "Driving License Renewal",
+    "description": "Renew your expired or soon-to-expire driving license",
+    "fee": 1800,
+    "processingTime": "2-3 working days",
+    "requirements": [
+      "Original driving license",
+      "National ID card",
+      "Medical certificate",
+      "Recent passport-size photographs"
+    ]
+  },
+  {
+    "id": "birth",
+    "name": "Birth Certificate",
+    "description": "Obtain a copy of your birth certificate",
+    "fee": 1000,
+    "processingTime": "1-2 working days",
+    "requirements": [
+      "Application form",
+      "National ID card",
+      "Original birth certificate (if available)",
+      "Proof of relationship (if applying for someone else)"
+    ]
+  }
+]
