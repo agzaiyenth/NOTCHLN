@@ -1,0 +1,5 @@
+[
+  { "id": "1", "name": "Battaramulla Head Office", "address": "123 Main Street, Battaramulla", "distance": "2.5 km" },
+  { "id": "2", "name": "Colombo District Office", "address": "456 Galle Road, Colombo 03", "distance": "5.2 km" },
+  { "id": "3", "name": "Nugegoda Branch", "address": "789 High Level Road, Nugegoda", "distance": "3.8 km" }
+]
