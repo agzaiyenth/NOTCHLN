@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -27,6 +27,7 @@ export default function DocumentUpload({
   acceptedTypes = [".pdf", ".jpg", ".jpeg", ".png"],
 }: DocumentUploadProps) {
   const [files, setFiles] = useState<DocumentFile[]>([])
+  const prevFilesRef = useRef<DocumentFile[]>([])
   const [dragActive, setDragActive] = useState(false)
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -72,13 +73,11 @@ export default function DocumentUpload({
                 clearInterval(interval)
                 const finalStatus = Math.random() > 0.1 ? "verified" : "rejected"
                 setTimeout(() => {
-                  setFiles((prev) => {
-                    const updated = prev.map((file) =>
+                  setFiles((prev) =>
+                    prev.map((file) =>
                       file.id === newFile.id ? { ...file, status: finalStatus as "verified" | "rejected" } : file,
-                    )
-                    onUploadComplete?.(updated)
-                    return updated
-                  })
+                    ),
+                  )
                 }, 500)
               }
               return { ...f, progress: newProgress }
@@ -89,6 +88,18 @@ export default function DocumentUpload({
       }, 200)
     })
   }
+
+  // Call onUploadComplete only after all files are done uploading (not during render)
+  useEffect(() => {
+    // Only run if files changed
+    if (prevFilesRef.current !== files) {
+      // Check if all files are uploaded (not uploading)
+      if (files.length > 0 && files.every((f) => f.status !== "uploading")) {
+        onUploadComplete?.(files)
+      }
+      prevFilesRef.current = files
+    }
+  }, [files, onUploadComplete])
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {

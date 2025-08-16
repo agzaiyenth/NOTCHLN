@@ -22,8 +22,10 @@ export default function OfficerLoginPage() {
     setLoading(true)
     setError("")
 
+    // TODO RPLACE WITH FIREBASE AUTH Authenticating
+
     if (username === "admin" && password === "12345678") {
-      // Store simple auth state in localStorage
+      // Store simple auth state in localStorage 
       localStorage.setItem(
         "officerAuth",
         JSON.stringify({
@@ -34,7 +36,6 @@ export default function OfficerLoginPage() {
         }),
       )
 
-      console.log("[v0] Officer login successful")
       router.push("/officer/dashboard")
     } else {
       setError("Invalid credentials. Use admin / 12345678")
