@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -131,3 +132,17 @@ export const getIdToken = async (): Promise<string> => {
   }
   throw new Error("No user is currently signed in.");
 };
+
+/**
+ * Signs out the currently logged-in user.
+ * @returns {Promise<void>} - Resolves when the user is successfully signed out.
+ */
+export async function logoutUser(): Promise<void> {
+  try {
+    await signOut(auth);
+    console.log("User signed out successfully.");
+  } catch (error) {
+    console.error("Error signing out user:", error);
+    throw error;
+  }
+}

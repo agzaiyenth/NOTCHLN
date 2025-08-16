@@ -127,17 +127,16 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-govdocs-blue hover:text-blue-700 mb-6">
+        <div className="text-center mb-2">
+          <Link href="/" className="inline-flex items-center gap-2 text-govdocs-blue hover:text-blue-700 mb-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-govdocs-blue rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
+            <div className="flex items-center justify-center gap-2 mb-0">
+            <div className="flex items-center space-x-2">
+              <img src="/logo.png" alt="GovDocs Logo" className="w-24 h-24" />
             </div>
-            <span className="text-2xl font-bold text-govdocs-blue">GovDocs</span>
-          </div>
+            </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
           <p className="text-gray-600">Get started with your AI document assistant</p>
         </div>

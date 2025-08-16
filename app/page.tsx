@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { db } from "@/lib/firebase"
 import { doc, getDoc } from "firebase/firestore"
-import { monitorAuthState, getIdToken } from "@/lib/authServices"
+import { monitorAuthState, getIdToken, logoutUser } from "@/lib/authServices"
 
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -44,6 +44,17 @@ export default function Page() {
     monitorAuthState(handleUserLoggedIn, handleUserLoggedOut)
   }, [])
 
+  const handleSignOut = async () => {
+    try {
+      await logoutUser()
+      console.log("User signed out successfully.")
+      setIsLoggedIn(false)
+      setFirstName("")
+    } catch (error) {
+      console.error("Error during sign-out:", error)
+    }
+  }
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
@@ -55,10 +66,7 @@ export default function Page() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-govdocs-blue rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">GovDocs</span>
+              <img src="/logo.png" alt="GovDocs Logo" className="w-20 h-20" />
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <a href="/dashboard" className="text-gray-600 hover:text-govdocs-blue transition-colors">
@@ -80,9 +88,7 @@ export default function Page() {
                     size="sm"
                     variant="outline"
                     className="text-gray-600 hover:text-blue-700"
-                    onClick={() => {
-                      setIsLoggedIn(false)
-                    }}
+                    onClick={handleSignOut}
                   >
                     Sign Out
                   </Button>
@@ -102,13 +108,7 @@ export default function Page() {
               {isLoggedIn ? (
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-600">Hey, {firstName}!</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setIsLoggedIn(false)
-                    }}
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleSignOut}>
                     Sign Out
                   </Button>
                 </div>
@@ -497,11 +497,8 @@ export default function Page() {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-govdocs-blue rounded-lg flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold">GovDocs</span>
-              </div>
+              <img src="/logo1.png" alt="GovDocs Logo" className="w-18 h-16" />
+            </div>
               <p className="text-gray-400">Making government services simple, fast, and accessible for everyone.</p>
             </div>
             <div>
