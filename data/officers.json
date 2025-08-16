@@ -1,0 +1,6 @@
+[
+  { "id": "1", "name": "Grama Niladhari", "location": "Local Office", "available": true },
+  { "id": "2", "name": "Principal", "location": "School Office", "available": true },
+  { "id": "3", "name": "Estate Superintendent", "location": "Estate Office", "available": false },
+  { "id": "4", "name": "Justice of Peace", "location": "Court Office", "available": true }
+]
