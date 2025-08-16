@@ -44,13 +44,32 @@ export default function BookingPage({ params }: { params: { id: string } }) {
   const [step, setStep] = useState<number>(1)
   const router = useRouter()
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 4) {
       setStep(step + 1)
     } else {
-      router.push("/payment")
+      // Call API
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: "123", // get from auth/session
+          serviceName: "NIC Replacement",
+          date: selectedDate,
+          time: selectedTime,
+          officer: selectedOfficer,
+          location: selectedLocation,
+        }),
+      })
+
+      if (res.ok) {
+        router.push("/payment")
+      } else {
+        alert("Booking failed!")
+      }
     }
   }
+
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1)
