@@ -9,7 +9,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const auth = getAuth();
 
@@ -39,12 +39,13 @@ export async function registerUser(
       displayName: `${firstName} ${lastName}`,
     });
 
-    // Save user data in Firestore
+    // Save user data in Firestore with role as 'user'
     await setDoc(doc(db, "users", user.uid), {
       firstName,
       lastName,
       phone,
       email,
+      role: "user", // Assign role as 'user'
       createdAt: new Date().toISOString(),
     });
 
@@ -67,7 +68,20 @@ export async function registerUser(
  */
 export async function loginUser(email: string, password: string): Promise<void> {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Check the role in Firestore
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      if (userData.role !== "user") {
+        throw new Error("This portal is only for users. Please try the officer portal.");
+      }
+    } else {
+      throw new Error("User data not found in Firestore.");
+    }
+
     console.log("User logged in successfully.");
   } catch (error) {
     const firebaseError = error as any; // Cast error to any to access its properties
