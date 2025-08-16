@@ -469,7 +469,7 @@ export default function Page() {
               assistant.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-govdocs-blue hover:bg-gray-100 text-lg px-8">
+              <Button size="lg" className="bg-white text-govdocs-blue hover:bg-gray-100 text-lg px-8" asChild>
                 <Link href="/signup">
                   Get Started Free
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -479,6 +479,7 @@ export default function Page() {
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-govdocs-blue text-lg px-8 bg-transparent"
+                asChild
               >
                 <Link href="/chat">Try AI Assistant</Link>
               </Button>
