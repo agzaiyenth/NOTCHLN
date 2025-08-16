@@ -6,7 +6,7 @@
     "build": "next build",
   "dev": "next dev",
     "lint": "next lint",
-    "start": "yarn start"
+    "start": "next start"
   },
   "dependencies": {
     "@ai-sdk/groq": "latest",
