@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, MessageCircle, ArrowLeft, Calendar, CreditCard } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import DocumentUpload from "@/components/document-upload"
 
 interface Message {
@@ -32,6 +33,7 @@ const initialMessages: Message[] = [
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const router = useRouter()
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -108,7 +110,13 @@ export default function ChatPage() {
   }
 
   const handleQuickReply = (reply: string) => {
-    console.log("Quick reply clicked:", reply) 
+    console.log("Quick reply clicked:", reply)
+    // If payment is required, redirect to payment page
+    const lastAiMsg = messages.filter(m => m.type === "ai").slice(-1)[0]
+    if (lastAiMsg && lastAiMsg.showPayment) {
+      router.push("/payment")
+      return
+    }
     addMessage(reply, "user")
     simulateAIResponse(reply)
   }
