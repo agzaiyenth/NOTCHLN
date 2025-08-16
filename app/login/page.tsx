@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import { loginUser } from "@/lib/authServices"
+import { loginUser, signUpWithGoogle } from "@/lib/authServices"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -35,7 +35,7 @@ export default function LoginPage() {
 
     try {
       await loginUser(formData.email, formData.password)
-      alert("Login successful!")
+      console.log("Login successful!")
       router.push("/")
     } catch (err: any) {
       console.error(err)
@@ -44,6 +44,21 @@ export default function LoginPage() {
       } else {
         setError("Failed to log in. Please try again.")
       }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setError("")
+    setLoading(true)
+    try {
+      await signUpWithGoogle()
+      console.log("Logged in with Google successfully!")
+      router.push("/")
+    } catch (err: any) {
+      console.error(err)
+      setError("Failed to log in with Google. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -129,7 +144,12 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <Button variant="outline" className="h-11 bg-transparent">
+              <Button
+                variant="outline"
+                className="h-11 bg-transparent"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+              >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"

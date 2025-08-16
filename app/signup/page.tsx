@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import { registerUser } from "@/lib/authServices"
+import { registerUser, signUpWithGoogle } from "@/lib/authServices"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -94,7 +94,7 @@ export default function SignupPage() {
         formData.lastName,
         formData.phone
       )
-      alert("Account created successfully!")
+      console.log("Account created successfully!")
       router.push("/")
     } catch (err: any) {
       console.error(err)
@@ -107,6 +107,21 @@ export default function SignupPage() {
       setLoading(false)
     }
   }
+
+  const handleGoogleSignUp = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await signUpWithGoogle();
+      console.log("Signed up with Google successfully!");
+      router.push("/");
+    } catch (err: any) {
+      console.error(err);
+      setError("Failed to sign up with Google. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-center justify-center p-4">
@@ -236,7 +251,12 @@ export default function SignupPage() {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <Button variant="outline" className="h-11 bg-transparent">
+              <Button
+                variant="outline"
+                className="h-11 bg-transparent"
+                onClick={handleGoogleSignUp}
+                disabled={loading}
+              >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"

@@ -5,6 +5,8 @@ import {
   onAuthStateChanged,
   updateProfile,
   signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -72,6 +74,37 @@ export async function loginUser(email: string, password: string): Promise<void> 
     if (firebaseError.code === "auth/invalid-credential") {
       throw new Error("auth/invalid-credential");
     }
+    throw firebaseError;
+  }
+}
+
+/**
+ * Signs up or logs in a user using Google Authentication and saves user data to Firestore.
+ * @returns {Promise<void>} - Resolves when the user is successfully signed in and data is saved.
+ */
+export async function signUpWithGoogle(): Promise<void> {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    if (user) {
+      const { displayName, email, phoneNumber } = user;
+      const [firstName, lastName] = displayName ? displayName.split(" ") : ["", ""];
+
+      // Save user data to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName,
+        lastName,
+        email,
+        phone: phoneNumber || "",
+      });
+
+      console.log("User signed in with Google and data saved to Firestore successfully.");
+    }
+  } catch (error) {
+    const firebaseError = error as any; // Cast error to any to access its properties
+    console.error("Error signing in with Google:", firebaseError);
     throw firebaseError;
   }
 }
