@@ -138,13 +138,9 @@ export default function OfficerDashboard() {
 
   useEffect(() => {
     const fetchApplications = async () => {
-      console.log("[v0] Loading officer dashboard data...")
-
       setApplications(mockApplications)
       setStats(calculateStats(mockApplications))
       setLoading(false)
-
-      console.log("[v0] Loaded applications:", mockApplications.length)
     }
 
     if (officerData) {
