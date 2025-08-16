@@ -1,7 +1,6 @@
-import { db } from "./firebase";
+import { db, auth } from "./firebase";
 import {
   createUserWithEmailAndPassword,
-  getAuth,
   onAuthStateChanged,
   updateProfile,
   signInWithEmailAndPassword,
@@ -10,8 +9,6 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-
-const auth = getAuth();
 
 /**
  * Registers a new user using Firebase Authentication and saves user data in Firestore.

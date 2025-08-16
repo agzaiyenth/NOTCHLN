@@ -1,27 +1,73 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { get } from "http";
-import { getAuth } from "firebase/auth";
-import  { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "firebase/app"
+import { getAuth } from "firebase/auth"
+import { getFirestore } from "firebase/firestore"
+import { getStorage } from "firebase/storage"
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCB-rHjFkQy6BgOqGVAtSgh9dNR6tD9PoQ",
-  authDomain: "govdocslk.firebaseapp.com",
-  projectId: "govdocslk",
-  storageBucket: "govdocslk.firebasestorage.app",
-  messagingSenderId: "503534313975",
-  appId: "1:503534313975:web:e8580165793b77b5e04ef2",
-  measurementId: "G-28FZ77Q1QS"
-};
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+}
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only on client side
+let firebaseInitialized = false
+let initializationError: string | null = null
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const requiredEnvVars = [
+  "NEXT_PUBLIC_FIREBASE_API_KEY",
+  "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+  "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+  "NEXT_PUBLIC_FIREBASE_APP_ID",
+]
 
-export default app;
+let app: any = null
+let clientAuth: any = null
+let clientDb: any = null
+let clientStorage: any = null
+
+// Ensure Firebase is initialized on both server and client
+if (!firebaseInitialized) {
+  try {
+    const hasValidConfig = Object.values(firebaseConfig).every((value) => value && value.length > 0)
+
+    if (!hasValidConfig) {
+      throw new Error("Invalid Firebase configuration values")
+    }
+
+    app = initializeApp(firebaseConfig)
+    clientAuth = getAuth(app)
+    clientDb = getFirestore(app)
+    clientStorage = getStorage(app)
+    firebaseInitialized = true
+  } catch (error) {
+    initializationError = `Firebase initialization failed: ${error}`
+  }
+}
+
+export { app }
+
+export const auth = firebaseInitialized ? clientAuth : null
+export const db = firebaseInitialized ? clientDb : null
+export const storage = firebaseInitialized ? clientStorage : null
+
+// Export initialization status
+export const isFirebaseAvailable = () => firebaseInitialized
+export const getFirebaseError = () => initializationError
+
+export const safeFirebaseOperation = async (operation: () => Promise<any>, fallback: any = null) => {
+  if (!firebaseInitialized) {
+    return fallback
+  }
+
+  try {
+    return await operation()
+  } catch (error) {
+    console.error("Firebase operation failed:", error)
+    return fallback
+  }
+}
