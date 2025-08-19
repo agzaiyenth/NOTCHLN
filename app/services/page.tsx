@@ -1,9 +1,12 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { FileText, Users, Shield, Building, Heart, Car, Search, Clock, Star, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import {useState} from "react"
 
 const services = [
   {
@@ -107,6 +110,8 @@ const services = [
 const categories = ["All", "Identity Documents", "Civil Registration", "Transport", "Business"]
 
 export default function ServicesPage() {
+  const [activeCategory, setActiveCategory]=useState<string>("All")
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -135,6 +140,7 @@ export default function ServicesPage() {
                   variant={category === "All" ? "default" : "outline"}
                   size="sm"
                   className={category === "All" ? "bg-govdocs-blue hover:bg-blue-700" : "bg-transparent"}
+                  onClick={() => setActiveCategory(category)}
                 >
                   {category}
                 </Button>
@@ -147,7 +153,9 @@ export default function ServicesPage() {
       {/* Services Grid */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
+          {services
+          .filter((service) => activeCategory === "All" || service.category === activeCategory)
+          .map((service) => (
             <Card key={service.id} className="hover:shadow-lg transition-shadow group cursor-pointer">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
