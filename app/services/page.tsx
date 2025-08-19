@@ -111,6 +111,7 @@ const categories = ["All", "Identity Documents", "Civil Registration", "Transpor
 
 export default function ServicesPage() {
   const [activeCategory, setActiveCategory]=useState<string>("All")
+  const [searchQuery, setSearchQuery] = useState("");
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -131,7 +132,12 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search services..." className="pl-10 h-11" />
+              <Input 
+                  placeholder="Search services..." 
+                  className="pl-10 h-11" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <div className="flex gap-2 overflow-x-auto">
               {categories.map((category) => (
@@ -155,6 +161,7 @@ export default function ServicesPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services
           .filter((service) => activeCategory === "All" || service.category === activeCategory)
+          .filter((service) => searchQuery === "" || service.title.toLowerCase().includes(searchQuery.toLowerCase()))
           .map((service) => (
             <Card key={service.id} className="hover:shadow-lg transition-shadow group cursor-pointer">
               <CardHeader className="pb-4">
