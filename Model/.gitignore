@@ -1,0 +1,25 @@
+# Exclude model binary files
+*.pkl
+*.model
+*.h5
+*.joblib
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.onnx
+*.tflite
+
+# Exclude large data files
+*.csv
+*.tsv
+*.parquet
+*.feather
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Keep directories but not their contents
+!*/
