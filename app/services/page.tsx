@@ -1,25 +1,48 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { FileText, Users, Shield, Building, Heart, Car, Search, Clock, Star, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import {useState} from "react"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  FileText,
+  Users,
+  Shield,
+  Building,
+  Heart,
+  Car,
+  Search,
+  Clock,
+  Star,
+  ArrowLeft,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 const services = [
   {
     id: "nic-passport",
     title: "NIC & Passport",
-    description: "Replace lost documents, renew expired ones, apply for new documents",
+    description:
+      "Replace lost documents, renew expired ones, apply for new documents",
     icon: FileText,
     category: "Identity Documents",
     duration: "30 mins",
     fee: "Rs. 1,000",
     rating: 4.8,
     popular: true,
-    services: ["New NIC", "NIC Replacement", "Passport Renewal", "New Passport"],
+    services: [
+      "New NIC",
+      "NIC Replacement",
+      "Passport Renewal",
+      "New Passport",
+    ],
   },
   {
     id: "birth-registration",
@@ -31,7 +54,11 @@ const services = [
     fee: "Rs. 500",
     rating: 4.9,
     popular: true,
-    services: ["Birth Certificate", "Late Registration", "Correction of Details"],
+    services: [
+      "Birth Certificate",
+      "Late Registration",
+      "Correction of Details",
+    ],
   },
   {
     id: "driving-license",
@@ -43,7 +70,12 @@ const services = [
     fee: "Rs. 2,500",
     rating: 4.7,
     popular: true,
-    services: ["New License", "License Renewal", "International Permit", "Duplicate License"],
+    services: [
+      "New License",
+      "License Renewal",
+      "International Permit",
+      "Duplicate License",
+    ],
   },
   {
     id: "death-registration",
@@ -67,7 +99,11 @@ const services = [
     fee: "Rs. 750",
     rating: 4.8,
     popular: false,
-    services: ["Marriage Certificate", "Marriage Registration", "Certificate Copy"],
+    services: [
+      "Marriage Certificate",
+      "Marriage Registration",
+      "Certificate Copy",
+    ],
   },
   {
     id: "business-registration",
@@ -79,7 +115,12 @@ const services = [
     fee: "Rs. 5,000",
     rating: 4.5,
     popular: false,
-    services: ["Company Registration", "Business License", "Tax Registration", "Trade Name"],
+    services: [
+      "Company Registration",
+      "Business License",
+      "Tax Registration",
+      "Trade Name",
+    ],
   },
   {
     id: "vehicle-registration",
@@ -91,7 +132,11 @@ const services = [
     fee: "Rs. 3,000",
     rating: 4.4,
     popular: false,
-    services: ["New Registration", "Transfer of Ownership", "Duplicate Registration"],
+    services: [
+      "New Registration",
+      "Transfer of Ownership",
+      "Duplicate Registration",
+    ],
   },
   {
     id: "tax-registration",
@@ -103,16 +148,27 @@ const services = [
     fee: "Rs. 1,500",
     rating: 4.3,
     popular: false,
-    services: ["VAT Registration", "Income Tax", "Withholding Tax", "Tax Clearance"],
+    services: [
+      "VAT Registration",
+      "Income Tax",
+      "Withholding Tax",
+      "Tax Clearance",
+    ],
   },
-]
+];
 
-const categories = ["All", "Identity Documents", "Civil Registration", "Transport", "Business"]
+const categories = [
+  "All",
+  "Identity Documents",
+  "Civil Registration",
+  "Transport",
+  "Business",
+];
 
 export default function ServicesPage() {
-  const [activeCategory, setActiveCategory]=useState<string>("All")
+  const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -123,8 +179,12 @@ export default function ServicesPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Government Services</h1>
-              <p className="text-gray-600">Choose a service and book your appointment</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Government Services
+              </h1>
+              <p className="text-gray-600">
+                Choose a service and book your appointment
+              </p>
             </div>
           </div>
 
@@ -132,11 +192,11 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input 
-                  placeholder="Search services..." 
-                  className="pl-10 h-11" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+              <Input
+                placeholder="Search services..."
+                className="pl-10 h-11"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex gap-2 overflow-x-auto">
@@ -145,7 +205,11 @@ export default function ServicesPage() {
                   key={category}
                   variant={category === "All" ? "default" : "outline"}
                   size="sm"
-                  className={category === "All" ? "bg-govdocs-blue hover:bg-blue-700" : "bg-transparent"}
+                  className={
+                    category === "All"
+                      ? "bg-govdocs-blue hover:bg-blue-700"
+                      : "bg-transparent"
+                  }
                   onClick={() => setActiveCategory(category)}
                 >
                   {category}
@@ -160,88 +224,142 @@ export default function ServicesPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services
-          .filter((service) => activeCategory === "All" || service.category === activeCategory)
-          .filter((service) => searchQuery === "" || service.title.toLowerCase().includes(searchQuery.toLowerCase()))
-          .map((service) => (
-            <Card key={service.id} className="hover:shadow-lg transition-shadow group cursor-pointer">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-govdocs-blue group-hover:text-white transition-colors">
-                      <service.icon className="w-6 h-6 text-govdocs-blue group-hover:text-white" />
+            .filter(
+              (service) =>
+                activeCategory === "All" || service.category === activeCategory
+            )
+            .filter(
+              (service) =>
+                searchQuery === "" ||
+                service.title.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((service) => (
+              <Card
+                key={service.id}
+                className="hover:shadow-lg transition-shadow group cursor-pointer"
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-govdocs-blue group-hover:text-white transition-colors">
+                        <service.icon className="w-6 h-6 text-govdocs-blue group-hover:text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">
+                          {service.title}
+                        </CardTitle>
+                        <Badge variant="secondary" className="text-xs mt-1">
+                          {service.category}
+                        </Badge>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{service.title}</CardTitle>
-                      <Badge variant="secondary" className="text-xs mt-1">
-                        {service.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  {service.popular && (
-                    <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Popular</Badge>
-                  )}
-                </div>
-                <CardDescription className="text-sm leading-relaxed">{service.description}</CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {service.duration}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    {service.rating}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-900">Available Services:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {service.services.slice(0, 3).map((subService, index) => (
-                      <Badge key={index} variant="outline" className="text-xs bg-transparent">
-                        {subService}
-                      </Badge>
-                    ))}
-                    {service.services.length > 3 && (
-                      <Badge variant="outline" className="text-xs bg-transparent">
-                        +{service.services.length - 3} more
+                    {service.popular && (
+                      <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">
+                        Popular
                       </Badge>
                     )}
                   </div>
-                </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    {service.description}
+                  </CardDescription>
+                </CardHeader>
 
-                <div className="flex items-center justify-between pt-2">
-                  <div className="text-lg font-bold text-govdocs-blue">{service.fee}</div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="bg-transparent" asChild>
-                      <Link href={`/services/${service.id}`}>Details</Link>
-                    </Button>
-                    <Button size="sm" className="bg-govdocs-blue hover:bg-blue-700" asChild>
-                      <Link href={`/services/${service.id}/book`}>Book Now</Link>
-                    </Button>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {service.duration}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      {service.rating}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-gray-900">
+                      Available Services:
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {service.services.slice(0, 3).map((subService, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs bg-transparent"
+                        >
+                          {subService}
+                        </Badge>
+                      ))}
+                      {service.services.length > 3 && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-transparent"
+                        >
+                          +{service.services.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="text-lg font-bold text-govdocs-blue">
+                      {service.fee}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-transparent"
+                        asChild
+                      >
+                        <Link href={`/services/${service.id}`}>Details</Link>
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-govdocs-blue hover:bg-blue-700"
+                        asChild
+                      >
+                        <Link href={`/services/${service.id}/book`}>
+                          Book Now
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
         </div>
 
         {/* Quick Actions */}
         <div className="mt-12 bg-white rounded-2xl p-8 shadow-sm border">
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold text-gray-900">Need Help Choosing?</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Need Help Choosing?
+            </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Not sure which service you need? Our AI assistant can guide you through the process and help you find the
-              right service.
+              Not sure which service you need? Our AI assistant can guide you
+              through the process and help you find the right service.
             </p>
-            <Button size="lg" className="bg-govdocs-blue hover:bg-blue-700" asChild>
-              <Link href="/chat">Chat with AI Assistant</Link>
-            </Button>
+            <div className="flex justify-center gap-4">
+              <Button
+                size="lg"
+                className="bg-govdocs-blue hover:bg-blue-700"
+                asChild
+              >
+                <Link href="/chat">Chat with AI Assistant</Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-govdocs-blue text-govdocs-blue"
+                asChild
+              >
+                <Link href="/prediction-test">Try Service Time Predictor</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }
