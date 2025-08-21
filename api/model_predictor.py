@@ -3,117 +3,133 @@ import os
 from datetime import datetime
 import random
 
+# Seed the random number generator for deterministic predictions
+random.seed(42)
+
 class ServiceCompletionTimePredictor:
-    # Define the numeric features list as a class attribute
-    num_features = ['appointment_hour', 'appointment_weekday', 'month', 
-                   'staff_load_ratio', 'employees_on_duty']
-                   
-    def __init__(self):
-        """Initialize the predictor with fallback logic since model loading has issues"""
-        # Initialize default attributes
-        self.model = None
-        self.scaler = None
-        self.le_task = None
-        self.le_section = None
-        
-        # Set up task mappings for fallback prediction
-        self.task_times = {
-            "PASSPORT_RENEWAL": 60,
-            "VISA_APPLICATION": 75,
-            "ID_CARD": 30,
-            "DRIVING_LICENSE": 45,
-            "BIRTH_CERTIFICATE": 35,
-            "MARRIAGE_CERTIFICATE": 40,
-            "POLICE_CLEARANCE": 50,
-            "TAX_FILING": 65,
-            "BUSINESS_REGISTRATION": 80,
-            "PROPERTY_TRANSFER": 90
-        }
-        
-        print("Predictor initialized with fallback logic")
-                   
-    def predict_completion_time(self, date, time_str, task_id):
+    def __init__(self, model_dir=None, datasets_dir=None):
         """
-        Predicts service completion time in minutes using fallback logic.
-        Inputs: 
-            date (YYYY-MM-DD)
-            time (HH:MM)
-            task_id (string)
+        Loads the trained model, scaler, encoders, and required datasets from disk.
         """
+        import joblib
+        if model_dir is None:
+            model_dir = os.path.join(os.path.dirname(__file__), '../Model/Tast1')
+        if datasets_dir is None:
+            datasets_dir = os.path.join(os.path.dirname(__file__), 'datasets')
+        self.model_dir = model_dir
+        self.datasets_dir = datasets_dir
+        self.model = joblib.load(os.path.join(model_dir, 'xgb_service_completion_model.pkl'))
+        self.scaler = joblib.load(os.path.join(model_dir, 'scaler.pkl'))
+        self.le_task = joblib.load(os.path.join(model_dir, 'task_label_encoder.pkl'))
+        self.le_section = joblib.load(os.path.join(model_dir, 'section_label_encoder.pkl'))
+        self.num_features = ['appointment_hour','appointment_weekday','month','staff_load_ratio','employees_on_duty']
+        # Load datasets
+        self.task_df = pd.read_csv(os.path.join(datasets_dir, 'tasks.csv'))
+        # Build a mapping from task_name (upper, no spaces/underscores) to task_id
+        self.task_name_to_id = {}
+        if 'task_name' in self.task_df.columns:
+            for _, row in self.task_df.iterrows():
+                name = str(row['task_name']).strip().upper().replace(' ', '').replace('_', '')
+                if name and name != 'NAN':
+                    self.task_name_to_id[name] = row['task_id']
+        self.staff_df = pd.read_csv(os.path.join(datasets_dir, 'staffing_train.csv'), parse_dates=['date'])
+        print("ML Predictor initialized with trained model, encoders, and datasets.")
+
+    def predict_completion_time(self, date, time_str, task_id, debug=False):
+        """
+        Predicts service completion time in minutes using the trained ML model and real features from datasets.
+        Inputs: date (YYYY-MM-DD), time (HH:MM), task_id (string)
+        Returns (prediction, debug_info) if debug=True, else just prediction.
+        """
+        debug_info = {}
         try:
+            debug_info['inputs'] = {'date': date, 'time': time_str, 'task_id': task_id}
             # Convert date to datetime
-            date = pd.to_datetime(date)
-            
-            # Extract features
+            date_dt = pd.to_datetime(date)
             hour = int(time_str.split(':')[0])
-            minute = int(time_str.split(':')[1])
-            weekday = date.weekday()
+            weekday = date_dt.weekday()
             is_weekend = 1 if weekday >= 5 else 0
-            month = date.month
-            
-            # Fallback prediction logic - rule-based estimation
-            # Start with base time for the task or default to 45 minutes
-            task_id_upper = task_id.upper()
-            
-            # Find the matching task or closest match
-            matching_task = None
-            for known_task in self.task_times:
-                if known_task.upper() in task_id_upper or task_id_upper in known_task.upper():
-                    matching_task = known_task
-                    break
-            
-            # Use the matching task time or default
-            if matching_task:
-                base_time = self.task_times[matching_task]
+            month = date_dt.month
+            debug_info['parsed'] = {'hour': hour, 'weekday': weekday, 'is_weekend': is_weekend, 'month': month}
+
+            # Map human-readable task_id to code if needed
+            original_task_id = task_id
+            mapped = False
+            if task_id not in self.task_df['task_id'].values:
+                lookup = str(task_id).strip().upper().replace(' ', '').replace('_', '')
+                if lookup in self.task_name_to_id:
+                    task_id = self.task_name_to_id[lookup]
+                    mapped = True
+            debug_info['final_task_id'] = task_id
+            debug_info['task_id_mapped'] = mapped
+
+            # Encode task_id
+            try:
+                task_id_encoded = self.le_task.transform([str(task_id)])[0]
+            except Exception as e:
+                debug_info['error'] = f"Task ID encoding failed: {e}"
+                if debug:
+                    return 60, debug_info
+                return 60
+            debug_info['task_id_encoded'] = int(task_id_encoded)
+
+            # Section id from task_df
+            section_id = 0
+            row = self.task_df.loc[self.task_df['task_id'] == task_id]
+            if not row.empty:
+                section_id = row['section_id'].values[0]
+            debug_info['section_id'] = section_id
+            try:
+                section_id_encoded = self.le_section.transform([str(section_id)])[0]
+            except Exception as e:
+                debug_info['error'] = f"Section ID encoding failed: {e}"
+                if debug:
+                    return 60, debug_info
+                return 60
+            debug_info['section_id_encoded'] = int(section_id_encoded)
+
+            # Staff features from staff_df (match by date and section_id)
+            staff_row = self.staff_df[(self.staff_df['date'] == date_dt) & (self.staff_df['section_id'] == section_id)]
+            if not staff_row.empty:
+                employees_on_duty = staff_row['employees_on_duty'].values[0]
+                if 'num_documents' in staff_row.columns:
+                    num_documents = staff_row['num_documents'].values[0]
+                elif 'total_task_time_minutes' in staff_row.columns:
+                    num_documents = staff_row['total_task_time_minutes'].values[0]
+                else:
+                    num_documents = 5
+                staff_load_ratio = num_documents / (employees_on_duty + 1)
+                debug_info['staff_row_found'] = True
             else:
-                # No match found, use default
-                base_time = 45  # Default base time in minutes
-            
-            # Add slight randomness (±10%)
-            variation = random.uniform(-0.1, 0.1) * base_time
-            base_time += variation
-            
-            # Adjust based on time of day
-            if hour < 10:  # Early morning
-                base_time -= 5
-            elif hour >= 12 and hour < 14:  # Lunch hour
-                base_time += 10
-            elif hour >= 16:  # Late afternoon
-                base_time += 5
-                
-            # Adjust based on weekday
-            if weekday >= 5:  # Weekend
-                base_time += 15
-            elif weekday == 0:  # Monday
-                base_time += 8  # Busier on Mondays
-            elif weekday == 4:  # Friday
-                base_time += 5  # Busier on Fridays
-                
-            # Adjust for month (busier during summer months)
-            if month >= 6 and month <= 8:
-                base_time += 7
-                
-            return round(base_time)
-                
+                debug_info['error'] = f"No staff row found for date={date_dt.date()}, section_id={section_id}"
+                employees_on_duty = 5
+                staff_load_ratio = 1.0
+                debug_info['staff_row_found'] = False
+            debug_info['employees_on_duty'] = employees_on_duty
+            debug_info['staff_load_ratio'] = staff_load_ratio
+
+            features_dict = {
+                'appointment_hour': hour,
+                'appointment_weekday': weekday,
+                'is_weekend': is_weekend,
+                'month': month,
+                'staff_load_ratio': staff_load_ratio,
+                'employees_on_duty': employees_on_duty,
+                'task_id_encoded': task_id_encoded,
+                'section_id_encoded': section_id_encoded
+            }
+            debug_info['features'] = features_dict
+            input_df = pd.DataFrame([features_dict])
+            input_df[self.num_features] = self.scaler.transform(input_df[self.num_features])
+            predicted_minutes = self.model.predict(input_df)[0]
+            debug_info['model_output'] = float(predicted_minutes)
+            if debug:
+                return round(float(predicted_minutes), 2), debug_info
+            return round(float(predicted_minutes), 2)
         except Exception as e:
-            print(f"Error during prediction: {e}")
-            # Return a reasonable default if all else fails
+            import traceback
+            debug_info['error'] = str(e)
+            debug_info['trace'] = traceback.format_exc()
+            if debug:
+                return 60, debug_info
             return 60
-    
-if __name__ == "__main__":
-    # Test the predictor
-    predictor = ServiceCompletionTimePredictor()
-    
-    # Example predictions
-    test_cases = [
-        {"date": "2025-08-29", "time": "10:30", "task_id": "PASSPORT_RENEWAL"},
-        {"date": "2025-09-15", "time": "14:15", "task_id": "VISA_APPLICATION"},
-        {"date": "2025-08-25", "time": "09:00", "task_id": "ID_CARD"}
-    ]
-    
-    for case in test_cases:
-        try:
-            prediction = predictor.predict_completion_time(case["date"], case["time"], case["task_id"])
-            print(f"\nPredicted completion time for {case['task_id']} on {case['date']} at {case['time']}: {prediction} minutes")
-        except Exception as e:
-            print(f"Prediction failed: {e}")

@@ -65,6 +65,8 @@ GROQ_API_KEY=your_groq_api_key_here
 
 # Optional: For development redirects (if using Supabase later)
 NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000
+
+NEXT_PUBLIC_PREDICTION_API_URL=http://localhost:5000
 ```
 
 > **Note:** To get a GROQ_API_KEY, create an account and generate a new key at [Groq Console](https://console.groq.com/)

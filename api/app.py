@@ -1,89 +1,78 @@
 from flask import Flask, request, jsonify
-from datetime import datetime
-import os
 from flask_cors import CORS
-from model_predictor import ServiceCompletionTimePredictor
+import os
+import traceback
 import joblib
-from xgboost import XGBRegressor
 import pandas as pd
+from datetime import datetime
+
+# Paths to model folders
+TASK1_MODEL_DIR = os.path.join(os.path.dirname(__file__), '../Model/Tast1')
+TASK2_MODEL_DIR = os.path.join(os.path.dirname(__file__), '../Model/Task2')
+
+# Load Task 1 (Service Completion Time) model and encoders
+service_model = joblib.load(os.path.join(TASK1_MODEL_DIR, 'xgb_service_completion_model.pkl'))
+service_scaler = joblib.load(os.path.join(TASK1_MODEL_DIR, 'scaler.pkl'))
+service_le_task = joblib.load(os.path.join(TASK1_MODEL_DIR, 'task_label_encoder.pkl'))
+service_le_section = joblib.load(os.path.join(TASK1_MODEL_DIR, 'section_label_encoder.pkl'))
+service_task_df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'datasets/tasks.csv'))
+
+# Load Task 2 (Staffing Needs) model and encoders
+staffing_model = joblib.load(os.path.join(TASK2_MODEL_DIR, 'xgb_staffing_model.pkl'))
+staffing_scaler = joblib.load(os.path.join(TASK2_MODEL_DIR, 'scaler.pkl'))
+staffing_le_section = joblib.load(os.path.join(TASK2_MODEL_DIR, 'section_label_encoder.pkl'))
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, origins="*", supports_credentials=True)
 
-# Path to model files
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                         'Model', 'Tast1')
-
-# Initialize the predictor
-try:
-    # Initialize with our robust fallback predictor that works even without model files
-    predictor = ServiceCompletionTimePredictor()
-    print("Model predictor initialized successfully with fallback logic")
-except Exception as e:
-    print(f"Error initializing model predictor: {e}")
-    predictor = None
-        
-@app.route('/predict', methods=['POST'])
-def predict():
-    """Endpoint to predict service completion time"""
+@app.route('/predict_service_time', methods=['POST'])
+def predict_service_time():
     try:
-        # Check if predictor is initialized
-        if predictor is None:
-            return jsonify({
-                'error': 'Model predictor not initialized. Please try again later.'
-            }), 500
-        
-        data = request.get_json()
-        
-        # Validate input
-        if not all(key in data for key in ['date', 'time', 'task_id']):
-            return jsonify({
-                'error': 'Missing required parameters. Please provide date, time, and task_id'
-            }), 400
-            
+        data = request.get_json(force=True)
         date = data['date']
-        time = data['time']
+        time_str = data['time']
         task_id = data['task_id']
-        
-        # Validate date format
-        try:
-            datetime.strptime(date, "%Y-%m-%d")
-        except ValueError:
-            return jsonify({
-                'error': 'Invalid date format. Please use YYYY-MM-DD'
-            }), 400
-            
-        # Validate time format
-        try:
-            datetime.strptime(time, "%H:%M")
-        except ValueError:
-            return jsonify({
-                'error': 'Invalid time format. Please use HH:MM (24-hour format)'
-            }), 400
-        
-        # Make prediction using our predictor
-        try:
-            completion_time = predictor.predict_completion_time(date, time, task_id)
-        except Exception as e:
-            return jsonify({
-                'error': f'Prediction error: {str(e)}'
-            }), 500
-            
-        # Ensure prediction is positive
-        completion_time = max(1, completion_time)
-        
-        return jsonify({
-            'expected_completion_time_minutes': completion_time
-        })
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        # Get section_id from tasks.csv
+        row = service_task_df[service_task_df['task_id'] == task_id]
+        if row.empty:
+            return jsonify({'error': 'Invalid task_id'}), 400
+        section_id = row.iloc[0]['section_id']
+        # Feature engineering
+        date_dt = pd.to_datetime(date)
+        hour = int(time_str.split(':')[0])
+        weekday = date_dt.weekday()
+        month = date_dt.month
+        task_id_encoded = service_le_task.transform([task_id])[0]
+        section_id_encoded = service_le_section.transform([section_id])[0]
+        # Dummy values for staff_load_ratio and employees_on_duty (could be improved)
+        staff_load_ratio = 1.0
+        employees_on_duty = 1.0
+        X = [[hour, weekday, month, task_id_encoded, section_id_encoded, staff_load_ratio, employees_on_duty]]
+        X_scaled = service_scaler.transform(X)
+        pred = service_model.predict(X_scaled)[0]
+        return jsonify({'expected_completion_time_minutes': max(1, round(pred))})
     except Exception as e:
-        return jsonify({'error': f'Prediction error: {str(e)}'}), 500
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
+
+@app.route('/predict_staffing', methods=['POST'])
+def predict_staffing():
+    try:
+        data = request.get_json(force=True)
+        date = data['date']
+        section_id = data['section_id']
+        date_dt = pd.to_datetime(date)
+        month = date_dt.month
+        weekday = date_dt.weekday()
+        section_id_encoded = staffing_le_section.transform([section_id])[0]
+        X = [[month, weekday, section_id_encoded]]
+        X_scaled = staffing_scaler.transform(X)
+        pred = staffing_model.predict(X_scaled)[0]
+        return jsonify({'predicted_employee_count': max(1, round(pred))})
+    except Exception as e:
+        return jsonify({'error': str(e), 'trace': traceback.format_exc()}), 500
 
 @app.route('/health', methods=['GET'])
-def health_check():
-    """Endpoint to check if the API is running"""
+def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':

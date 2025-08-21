@@ -26,6 +26,16 @@ export async function createBooking(data: {
     }
   }
 
+  const query = `
+    INSERT INTO Bookings (
+      UserId, ServiceName, Date, Time, Officer, Location, PredictedCompletionTime
+    )
+    OUTPUT INSERTED.*
+    VALUES (
+      @UserId, @ServiceName, @Date, @Time, @Officer, @Location, @PredictedCompletionTime
+    )
+  `;
+
   const result = await pool
     .request()
     .input("UserId", data.userId)
@@ -34,11 +44,8 @@ export async function createBooking(data: {
     .input("Time", data.time)
     .input("Officer", data.officer)
     .input("Location", data.location)
-    .input("PredictedCompletionTime", predictedCompletionTime).query(`
-      INSERT INTO Bookings (UserId, ServiceName, Date, Time, Officer, Location, PredictedCompletionTime)
-      OUTPUT INSERTED.*
-      VALUES (@UserId, @ServiceName, @Date, @Time, @Officer, @Location, @PredictedCompletionTime)
-    `);
+    .input("PredictedCompletionTime", predictedCompletionTime)
+    .query(query);
 
   return result.recordset[0];
 }
