@@ -113,7 +113,7 @@ export function ServiceTimePrediction({
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center">
+        <CardTitle className="text-lg flex items-center text-[18px]">
           <Clock className="mr-2 h-5 w-5 text-blue-500" />
           Service Time Prediction
         </CardTitle>
@@ -148,9 +148,9 @@ export function ServiceTimePrediction({
         <CardFooter>
           <Button
             variant="outline"
-            size="sm"
+            
             onClick={onRefresh}
-            className="w-full"
+            className="w-full text-[16px]" 
           >
             Refresh Prediction
           </Button>

@@ -21,6 +21,9 @@ const Navbar=()=>{
               <a href="#about" className="text-gray-600 hover:text-govdocs-blue transition-colors">
                 About
               </a>
+              <a href="/prediction-test" className="text-gray-600 hover:text-govdocs-blue transition-colors">
+                Prediction Model
+              </a>
               <a href="#how-it-works" className="text-gray-600 hover:text-govdocs-blue transition-colors">
                 How It Works
               </a>
