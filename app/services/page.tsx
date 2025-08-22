@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import Footer from "../Footer";
 
 const services = [
   {
@@ -360,6 +361,7 @@ export default function ServicesPage() {
           </div>
         </div>
       </main>
+      <Footer/>
     </div>
   );
 }
