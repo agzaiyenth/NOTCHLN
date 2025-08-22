@@ -78,10 +78,10 @@ export function ServiceTimePrediction({
   // Display error state
   if (error || predictedTime === null) {
     return (
-      <Card className="w-full border-yellow-200 bg-yellow-50">
+      <Card className="w-full border-blue-200 bg-blue-50">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center">
-            <AlertCircle className="mr-2 h-5 w-5 text-yellow-500" />
+            <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
             Service Time Prediction
           </CardTitle>
           <CardDescription>
