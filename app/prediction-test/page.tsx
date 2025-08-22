@@ -46,7 +46,7 @@ const tasks = [
 export default function PredictionTest() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState("10:00");
-  const [taskId, setTaskId] = useState("PASSPORT_RENEWAL");
+  const [taskId, setTaskId] = useState("");
   const [showPrediction, setShowPrediction] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -100,7 +100,7 @@ export default function PredictionTest() {
                   </Label>
                   <Select value={taskId} onValueChange={setTaskId}>
                     <SelectTrigger id="service">
-                      <SelectValue placeholder="Choose a service type" />
+                      <SelectValue  placeholder="Choose a service type" />
                     </SelectTrigger>
                     <SelectContent>
                       {tasks.map((task) => (
@@ -167,24 +167,16 @@ export default function PredictionTest() {
                 {/* Button */}
 
               <Button
-                className="w-full h-12 text-base font-medium"
+                className="w-full h-12 text-base font-medium "
                 onClick={handlePredict}
                 disabled={!taskId || taskId === ""}
                 size="lg"
               >
-                {/* Get Prediction */}
-                {!taskId ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                      Analyzing...
-                    </div>
-                  ) : (
-                    <>
-                      <Clock className="h-4 w-4 mr-2" />
-                      Calculate Processing Time
-                    </>
-                  )}
+                <Clock className="h-4 w-4 mr-2" />
+                Calculate Processing Time
+
               </Button>
+              {/* Get Prediction */}
               <div className="mt-8">
                 {showPrediction && (
                 <ServiceTimePrediction
