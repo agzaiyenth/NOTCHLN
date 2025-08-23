@@ -30,6 +30,7 @@
 - **Document verification** capabilities
 - **Seamless local development** setup
 - **Modern web interface** built with Next.js
+- **Service completion time prediction** using machine learning
 - Optional integration with Supabase for data persistence
 
 ---
@@ -64,6 +65,8 @@ GROQ_API_KEY=your_groq_api_key_here
 
 # Optional: For development redirects (if using Supabase later)
 NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000
+
+NEXT_PUBLIC_PREDICTION_API_URL=http://localhost:5000
 ```
 
 > **Note:** To get a GROQ_API_KEY, create an account and generate a new key at [Groq Console](https://console.groq.com/)
@@ -81,6 +84,22 @@ yarn run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+
+### Run the Prediction API
+
+The application includes a machine learning model that predicts service completion times. To run the prediction API:
+
+```bash
+cd api
+# On Windows
+run_api.bat
+
+# On Linux/Mac
+chmod +x run_api.sh
+./run_api.sh
+```
+
+The prediction API will be available at [http://localhost:5000](http://localhost:5000).
 
 ---
 
@@ -139,20 +158,24 @@ We welcome contributions! Please follow these steps:
 ## Troubleshooting
 
 ### App doesn't start / missing modules
+
 - Ensure you are using **Yarn** (not npm) and run `yarn` to install dependencies
 - Delete `node_modules` and `yarn.lock`, then run `yarn` again if issues persist
 
 ### Environment variables not loaded
+
 - Check that `.env.local` exists in the project root
 - Verify that all required environment variables are present and correctly formatted
 - Restart the development server after making changes to `.env.local`
 
 ### Port conflicts
+
 - The default port is 3000
 - If port 3000 is in use, Next.js will automatically try the next available port
 - Update `NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL` in `.env.local` if using a different port
 
 ### API Key Issues
+
 - Ensure your GROQ_API_KEY is valid and has sufficient credits
 - Check the [Groq Console](https://console.groq.com/) for API usage and limits
 
@@ -172,6 +195,7 @@ If you encounter any issues or have questions:
 ## Development
 
 This project is built with:
+
 - **Next.js 13+** with App Router - React framework for production
 - **TypeScript** - Type-safe JavaScript
 - **Tailwind CSS** - Utility-first CSS framework

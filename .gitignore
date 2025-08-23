@@ -27,3 +27,27 @@ yarn-error.log*
 .DS_Store
 
 .env.local
+
+# Python / Flask API
+api/venv/
+api/__pycache__/
+api/*.py[cod]
+api/*$py.class
+api/*.so
+api/*.pkl
+api/*.model
+api/instance/
+api/.webassets-cache
+api/.pytest_cache/
+api/.coverage
+api/htmlcov/
+
+# Exclude large model files, but keep the structure
+Model/**/*.pkl
+Model/**/*.model
+Model/**/*.joblib
+Model/**/*.h5
+Model/**/checkpoint/
+Model/**/__pycache__/
+# Keep the directory structure
+!Model/**/

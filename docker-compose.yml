@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  # Next.js frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_PREDICTION_API_URL=http://prediction-api:5000
+    depends_on:
+      - prediction-api
+    restart: always
+
+  # Flask prediction API
+  prediction-api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - ./Model:/app/Model
+    restart: always

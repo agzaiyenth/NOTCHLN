@@ -1,4 +1,5 @@
 import { getConnection } from "@/lib/db";
+import { predictServiceCompletionTime } from "@/lib/prediction-service";
 
 export async function createBooking(data: {
   userId: string;
@@ -7,8 +8,33 @@ export async function createBooking(data: {
   time: string;
   officer: string;
   location: string;
+  taskId?: string; // Optional task ID for prediction
 }) {
   const pool = await getConnection();
+
+  // Predict completion time if taskId is provided
+  let predictedCompletionTime: number | null = null;
+  if (data.taskId) {
+    try {
+      predictedCompletionTime = await predictServiceCompletionTime(
+        data.date,
+        data.time,
+        data.taskId
+      );
+    } catch (error) {
+      console.error("Failed to predict completion time:", error);
+    }
+  }
+
+  const query = `
+    INSERT INTO Bookings (
+      UserId, ServiceName, Date, Time, Officer, Location, PredictedCompletionTime
+    )
+    OUTPUT INSERTED.*
+    VALUES (
+      @UserId, @ServiceName, @Date, @Time, @Officer, @Location, @PredictedCompletionTime
+    )
+  `;
 
   const result = await pool
     .request()
@@ -18,11 +44,8 @@ export async function createBooking(data: {
     .input("Time", data.time)
     .input("Officer", data.officer)
     .input("Location", data.location)
-    .query(`
-      INSERT INTO Bookings (UserId, ServiceName, Date, Time, Officer, Location)
-      OUTPUT INSERTED.*
-      VALUES (@UserId, @ServiceName, @Date, @Time, @Officer, @Location)
-    `);
+    .input("PredictedCompletionTime", predictedCompletionTime)
+    .query(query);
 
   return result.recordset[0];
 }
